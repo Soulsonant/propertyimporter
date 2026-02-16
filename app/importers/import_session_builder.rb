@@ -32,52 +32,56 @@ class ImportSessionBuilder
 
   private
 
-  def annotate_rows(rows)
-    # Track names seen within this upload to catch intra-CSV duplicates
-    seen_names = {}
+def annotate_rows(rows)
+  seen_names = {}
 
-    rows.map do |row|
-      name = row["building_name"].to_s.downcase.strip
+  rows.map do |row|
+    name = row["building_name"].to_s.downcase.strip
 
-      if row["csv_errors"].any?
-        row.merge("status" => "error", "errors" => row["csv_errors"])
+    if row["csv_errors"].any?
+      row.merge("status" => "error", "errors" => row["csv_errors"])
+
+    else
+      existing = Property.find_by_name_ci(row["building_name"])
+
+      if existing
+        # Property already exists in the database — show diff regardless
+        # of whether the name appears multiple times in this CSV
+        seen_names[name] = true
+        diff = compute_diff(existing, row)
+        row.merge(
+          "status"      => "existing",
+          "property_id" => existing.id,
+          "diff"        => diff,
+          "errors"      => []
+        )
 
       elsif seen_names.key?(name)
+        # Name not in DB but already seen in this CSV — warn but allow
         row.merge(
-          "status" => "duplicate",
-          "errors" => ["Building name \"#{row["building_name"]}\" appears more than once in this CSV"]
+          "status" => "warning",
+          "errors" => ["Building name \"#{row["building_name"]}\" appears more than once in this CSV — will be imported as the same property with a unit entry"]
         )
 
       else
+        # Brand new name, not in DB and not seen yet in this CSV
         seen_names[name] = true
-        existing = Property.find_by_name_ci(row["building_name"])
-
-        if existing
-          diff = compute_diff(existing, row)
-          row.merge(
-            "status"      => "existing",
-            "property_id" => existing.id,
-            "diff"        => diff,
-            "errors"      => []
-          )
+        candidate = Property.new(
+          name:           row["building_name"],
+          street_address: row["street_address"],
+          city:           row["city"],
+          state:          row["state"],
+          zip_code:       row["zip_code"]
+        )
+        if candidate.valid?
+          row.merge("status" => "new", "errors" => [])
         else
-          # Validate against the Property model without saving
-          candidate = Property.new(
-            name:           row["building_name"],
-            street_address: row["street_address"],
-            city:           row["city"],
-            state:          row["state"],
-            zip_code:       row["zip_code"]
-          )
-          if candidate.valid?
-            row.merge("status" => "new", "errors" => [])
-          else
-            row.merge("status" => "error", "errors" => candidate.errors.full_messages)
-          end
+          row.merge("status" => "error", "errors" => candidate.errors.full_messages)
         end
       end
     end
   end
+end
 
   # Returns a hash of { field => { "was" => old_value, "will_be" => new_value } }
   # for fields that would change on an existing property

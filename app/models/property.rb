@@ -6,7 +6,7 @@ class Property < ApplicationRecord
   validates :name,          presence: true, uniqueness: { case_sensitive: false }
   validates :street_address, presence: true
   validates :city,          presence: true
-  validates :state,         presence: true, length: { is: 2 }
+  validates :state,         presence: true
   validates :zip_code,      presence: true,
                             format: { with: /\A\d{5}(-\d{4})?\z/, message: "must be 5-digit or ZIP+4" }
 
