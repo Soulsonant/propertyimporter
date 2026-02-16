@@ -5,7 +5,7 @@ ruby "3.4.8"
 
 gem "rails", "~> 7.1"
 gem "pg", "~> 1.1"
-gem "puma", "~> 6.0"
+gem "puma", "~> 7.2"
 gem "importmap-rails"
 gem "turbo-rails"
 gem "stimulus-rails"
