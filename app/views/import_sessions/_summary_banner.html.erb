@@ -1,0 +1,22 @@
+<div id="summary_banner" style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+  <div class="card" style="flex:1; min-width:120px; padding:14px; text-align:center;">
+    <div style="font-size:28px; font-weight:700; color:#1a1a2e;"><%= session.total_count %></div>
+    <div style="font-size:12px; color:#64748b;">Total rows</div>
+  </div>
+  <div class="card" style="flex:1; min-width:120px; padding:14px; text-align:center;">
+    <div style="font-size:28px; font-weight:700; color:#16a34a;"><%= session.new_count %></div>
+    <div style="font-size:12px; color:#64748b;">New properties</div>
+  </div>
+  <div class="card" style="flex:1; min-width:120px; padding:14px; text-align:center;">
+    <div style="font-size:28px; font-weight:700; color:#1d4ed8;"><%= session.existing_count %></div>
+    <div style="font-size:12px; color:#64748b;">Will update</div>
+  </div>
+  <div class="card" style="flex:1; min-width:120px; padding:14px; text-align:center;">
+    <div style="font-size:28px; font-weight:700; color:#dc2626;"><%= session.error_count %></div>
+    <div style="font-size:12px; color:#64748b;">Errors</div>
+  </div>
+  <div class="card" style="flex:1; min-width:120px; padding:14px; text-align:center;">
+    <div style="font-size:28px; font-weight:700; color:#94a3b8;"><%= session.dismissed_count %></div>
+    <div style="font-size:12px; color:#64748b;">Dismissed</div>
+  </div>
+</div>

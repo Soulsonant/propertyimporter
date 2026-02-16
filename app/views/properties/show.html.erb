@@ -1,0 +1,30 @@
+<p><%= link_to "← All Properties", properties_path, style: "color:#64748b; font-size:13px; text-decoration:none;" %></p>
+
+<h1><%= @property.name %></h1>
+<p class="subtitle">
+  <%= @property.street_address %>, <%= @property.city %>, <%= @property.state %> <%= @property.zip_code %>
+</p>
+
+<div class="card">
+  <h2>Units (<%= @property.units.size %>)</h2>
+  <% if @property.units.empty? %>
+    <p style="color:#64748b;">No units recorded for this property.</p>
+  <% else %>
+    <table>
+      <thead>
+        <tr>
+          <th>Unit Number</th>
+          <th>Added</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @property.units.order(:unit_number).each do |unit| %>
+          <tr>
+            <td><strong><%= unit.unit_number %></strong></td>
+            <td style="color:#94a3b8; font-size:12px;"><%= unit.created_at.strftime("%b %d, %Y") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>

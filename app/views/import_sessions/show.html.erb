@@ -1,0 +1,103 @@
+<h1>Import Preview</h1>
+<p class="subtitle">
+  File: <strong><%= @import_session.original_filename %></strong> &mdash;
+  uploaded <%= time_ago_in_words(@import_session.created_at) %> ago
+</p>
+
+<%# Summary banner — replaced via Turbo Stream when rows are dismissed %>
+<%= render "summary_banner", session: @import_session %>
+
+<% if @import_session.confirmed? %>
+  <div class="alert alert-notice">
+    This import has been confirmed and committed to the database.
+  </div>
+<% elsif @import_session.failed? %>
+  <div class="alert alert-alert">
+    This import failed and was rolled back. <%= @import_session.error_message %>
+  </div>
+<% end %>
+
+<%# Confirm button section — replaced via Turbo Stream %>
+<%= render "confirm_section", session: @import_session %>
+
+<%# Row table %>
+<div class="card" style="padding: 0; overflow: hidden;">
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 40px;">#</th>
+        <th>Status</th>
+        <th>Building Name</th>
+        <th>Address</th>
+        <th>Unit</th>
+        <th>City</th>
+        <th>State</th>
+        <th>ZIP</th>
+        <th style="width: 80px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @import_session.parsed_data.each do |row| %>
+        <% dismissed = @import_session.dismissed_rows.include?(row["row_index"]) %>
+        <tr id="row_<%= row["row_index"] %>"
+            style="<%= dismissed ? "opacity:0.4; text-decoration:line-through;" : "" %>
+                   <%= row["status"] == "error" || row["status"] == "duplicate" ? "background:#fef2f2;" : "" %>
+                   <%= row["status"] == "existing" ? "background:#eff6ff;" : "" %>">
+          <td style="color:#94a3b8; font-size:12px;"><%= row["row_index"] + 1 %></td>
+          <td>
+            <% if dismissed %>
+              <span class="badge badge-dismissed">dismissed</span>
+            <% else %>
+              <span class="badge badge-<%= row["status"] %>"><%= row["status"] %></span>
+            <% end %>
+          </td>
+          <td><strong><%= row["building_name"] %></strong></td>
+          <td>
+            <% if row["diff"]&.key?("street_address") %>
+              <span style="color:#dc2626; text-decoration:line-through; font-size:11px;">
+                <%= row["diff"]["street_address"]["was"] %>
+              </span><br>
+              <%= row["street_address"] %>
+            <% else %>
+              <%= row["street_address"] %>
+            <% end %>
+          </td>
+          <td><%= row["unit"].presence || "—" %></td>
+          <td>
+            <% if row["diff"]&.key?("city") %>
+              <span style="color:#dc2626; text-decoration:line-through; font-size:11px;">
+                <%= row["diff"]["city"]["was"] %>
+              </span><br><%= row["city"] %>
+            <% else %>
+              <%= row["city"] %>
+            <% end %>
+          </td>
+          <td><%= row["state"] %></td>
+          <td><%= row["zip_code"] %></td>
+          <td>
+            <% unless dismissed || @import_session.confirmed? %>
+              <%= button_to "Dismiss",
+                    dismiss_row_import_session_path(@import_session, row_index: row["row_index"]),
+                    method: :delete,
+                    class: "btn btn-secondary",
+                    style: "font-size:11px; padding:4px 10px;",
+                    data: { turbo_stream: true } %>
+            <% end %>
+          </td>
+        </tr>
+        <% if row["errors"]&.any? && !dismissed %>
+          <tr id="row_<%= row["row_index"] %>_errors" style="background:#fef2f2;">
+            <td></td>
+            <td colspan="8" style="color:#dc2626; font-size:12px; padding-top:4px; padding-bottom:8px;">
+              <%= row["errors"].join(" · ") %>
+            </td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<p style="margin-top:12px;">
+  <%= link_to "← Upload a different file", new_import_path, class: "btn btn-secondary" %>
+</p>
