@@ -33,11 +33,17 @@ No in-line editing at this point - easier if i was using a staging table
 
 # 3. WHAT I'D WORK ON NEXT:
 Input from stakeholders - pain points, ways to improve, etc.
+
 Edit button inside my form to immediately fix errors before importing.
+
 Force button to push something even if it had an error of some kind
+
 Check for zip code/city validation using gem zip_codes
-Make it looks way nicer
+
+Make it look way nicer
+
 More validation checks.  internal tool but very little security around injects or bad characters beyond what i've already checked for. 
+
 More duplication checks.  
 
 
