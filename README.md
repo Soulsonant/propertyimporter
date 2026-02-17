@@ -7,8 +7,12 @@ cd propertyimporter
 
 bundle install 
 
+Create a postgres username - tk with password tk
+
 export DB_USERNAME=tk
+
 export DB_PASSWORD=tk
+
 export DB_HOST=localhost
 
 rails db:create db:migrate
